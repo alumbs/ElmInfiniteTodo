@@ -71,7 +71,7 @@ init =
 type Msg
     = Add Int
     | UpdateTodoId
-    | Noop
+    | ToggleTodoComplete Int
 
 
 update : Msg -> Model -> Model
@@ -83,8 +83,30 @@ update msg model =
         UpdateTodoId ->
             { model | nextTodoId = model.nextTodoId + 1 }
 
-        Noop ->
-            model
+        ToggleTodoComplete todoId ->
+            let
+                -- findTodoForId = findTodo todoId
+                toggleTodoListCompleteFunc =
+                    toggleTodoListComplete todoId
+            in
+            { model | todolist = toggleTodoListCompleteFunc model.todolist }
+
+
+toggleTodoListComplete idToFind todolist =
+    case todolist.children of
+        Nothing ->
+            todolist
+
+        Just todos ->
+            { todolist | children = Just (List.map (toggleTodoComplete idToFind) todos) }
+
+
+toggleTodoComplete idToFind singleTodo =
+    if singleTodo.id == idToFind then
+        { singleTodo | complete = not singleTodo.complete }
+
+    else
+        singleTodo
 
 
 addChildToTodolist : TodoList -> Int -> Int -> TodoList
@@ -129,6 +151,15 @@ renderTodoList parentTodoId children =
 
 renderTodo : Maybe (List Todo) -> Todo -> Element Msg
 renderTodo allTodos todo =
+    let
+        completeTextString =
+            case todo.complete of
+                True ->
+                    "Mark Not Complete"
+
+                False ->
+                    "Mark As Complete"
+    in
     column [ paddingEach { edges | left = 10 }, width fill ]
         [ row [ width fill, spaceEvenly ]
             [ el [] (text (todo.description ++ Debug.toString todo.id))
@@ -137,6 +168,7 @@ renderTodo allTodos todo =
                     "Complete: "
                         ++ Debug.toString todo.complete
                 )
+            , Input.button [] { label = text completeTextString, onPress = Just (ToggleTodoComplete todo.id) }
             , Input.button [] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
             ]
         , row [ width fill, paddingEach { edges | top = 3 } ]
