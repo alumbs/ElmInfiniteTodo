@@ -1,144 +1,127 @@
+module Main exposing (Model, Msg(..), Todo, TodoList, init, main, newTodo, newTodoList, renderTodo, renderTodoChildren, update, view)
+
 import Browser
-import Html exposing (Html)
 import Element exposing (..)
-import Element.Events exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Input as Input
+import Element.Events exposing (..)
 import Element.Font as Font
+import Element.Input as Input
+import Html exposing (Html)
+import List exposing (append)
+
 
 main =
-  Browser.sandbox { init = init , update = update, view = view }
+    Browser.sandbox { init = init, update = update, view = view }
 
-type alias Todo = 
-  {
-    id: Int,
-    description: String,
-    complete: Bool,
-    parentId: Int
-  }
 
-type alias TodoList = 
-  {
-    root: Todo,
-    children: Maybe (List Todo)
-  }
+type alias Todo =
+    { id : Int
+    , description : String
+    , complete : Bool
+    , parentId : Int
+    }
 
-type alias Model = 
-  {
-    nextTodoId: Int,
-    todolist: TodoList
-  }
-  -- {
-  --     newtodo: Int,
-  --     todos: List String
-  -- }
 
-newTodoList = 
-  {
-    root = newTodo "Root" -1 0,
-    children = Nothing
-  }
+type alias TodoList =
+    { root : Todo
+    , children : Maybe (List Todo)
+    }
 
-newTodo: String -> Int -> Int -> Todo
+
+type alias Model =
+    { nextTodoId : Int
+    , todolist : TodoList
+    }
+
+
+newTodoList =
+    { root = newTodo "Root" -1 0
+    , children = Nothing
+    }
+
+
+newTodoListWithOneChild : TodoList
+newTodoListWithOneChild =
+    { newTodoList | children = Just [ newTodo "New" 1 2 ] }
+
+
+newTodo : String -> Int -> Int -> Todo
 newTodo description parentTodoId nextTodoId =
-  {
-    id = nextTodoId,
-    description = description,
-    complete = False,
-    parentId = parentTodoId
-  }
+    { id = nextTodoId + 1
+    , description = description
+    , complete = False
+    , parentId = parentTodoId
+    }
 
-init: Model
-init = { nextTodoId = 0, todolist = newTodoList }
-  -- ( { newtodo = 0, todos = ["Bob"] }
-  -- , Cmd.none
-  -- )
 
-type Msg = Add | UpdateTodoId
+init : Model
+init =
+    { nextTodoId = 0, todolist = newTodoList }
 
-update: Msg -> Model -> Model
+
+type Msg
+    = Add Int
+    | UpdateTodoId
+    | Noop
+
+
+update : Msg -> Model -> Model
 update msg model =
-  case msg of
-    Add ->
-      { model | nextTodoId = model.nextTodoId + 1 }
+    case msg of
+        Add parentTodoId ->
+            { model | nextTodoId = model.nextTodoId + 1, todolist = addChildToTodolist model.todolist parentTodoId model.nextTodoId }
 
-    UpdateTodoId -> 
-      { model | nextTodoId = model.nextTodoId + 1 }
-      -- ( { model | todos = "Hi" :: model.todos }
-      -- , Cmd.none
-      -- )
-      -- ( { model | todos.push "New One"}
-      -- , Cmd.none
-      -- )
+        UpdateTodoId ->
+            { model | nextTodoId = model.nextTodoId + 1 }
 
-    -- Decrement ->
-    --   model - 1
+        Noop ->
+            model
 
-view: Model -> Html Msg
+
+addChildToTodolist : TodoList -> Int -> Int -> TodoList
+addChildToTodolist todolist parentTodoId nextTodoId =
+    case todolist.children of
+        Nothing ->
+            { todolist | children = Just [ newTodo "New" parentTodoId (nextTodoId + 1) ] }
+
+        Just listOfTodos ->
+            { todolist | children = Just (newTodo "New" parentTodoId (nextTodoId + 1) :: listOfTodos) }
+
+
+view : Model -> Html Msg
 view model =
-  layout [] <|
-    row [ height fill, width fill ]
-        [column[][ el [] (text "Chibs Todo App")
-        , Input.button [onClick Add] ({label = text "Add New Todo", onPress = Nothing})
-        , el [] 
-          (column[]
-            [ renderTodo model.todolist.root
+    layout [ height fill, width fill, paddingXY 0 10 ] <|
+        column [ centerX, spacingXY 0 10 ]
+            [ el [ Font.size 20, Font.color (rgb255 240 0 245) ] (text "Chibs Todo App")
+
+            -- , Input.button [] { label = text "Add New Todo", onPress = Nothing }
+            , renderTodo model.todolist.root
             , renderTodoChildren model.todolist.children
-            -- , column[] (List.map renderTodo (Maybe model.todolist.children ) )
             ]
-          )
-        ]
-        ]
-  -- layout []
-  --   row [  [] [text ( "Chibs Todo App")]
-  --   -- , input [value model.newTodoText] []
-  --   , button [ onClick Add ] [text "Add New Todo"]
-  --   , div [] (List.map renderTodo model.todos)
-  --   -- , div [] [ text (String.fromInt model) ]
-  --   -- , button [ onClick Increment ] [ text "+" ]
-  --   ]
 
-renderTodoChildren: Maybe (List Todo) -> Element Msg
-renderTodoChildren children = 
-  case children of
-      Nothing ->
-        column[] []
-  
-      Just todoChildren ->
-        column[]
-        (
-          List.map renderTodo todoChildren 
-        )
-          -- [
-          --   el[](text todoVal.description),
-          --   el[] 
-          --     (text 
-          --       <| "Complete" ++ (Debug.toString todoVal.complete) 
-          --     )
-          -- ]
 
+renderTodoChildren : Maybe (List Todo) -> Element Msg
+renderTodoChildren children =
+    case children of
+        Nothing ->
+            none
+
+        Just todoChildren ->
+            column []
+                (List.map renderTodo todoChildren)
+
+
+renderTodo : Todo -> Element Msg
 renderTodo todo =
-  column[]
-    [
-      el[](text todo.description),
-      el[] 
-        (text 
-          <| "Complete: " ++ (Debug.toString todo.complete) 
-        )
-    ]
+    row [ paddingXY 10 0 ]
+        [ el [] (text (todo.description ++ Debug.toString todo.id))
+        , el []
+            (text <|
+                "Complete: "
+                    ++ Debug.toString todo.complete
+            )
 
--- renderTodo todo =
---   case todo of
---     Just todoVal ->
---       column[]
---         [
---           el[](text todoVal.description),
---           el[] 
---             (text 
---               <| "Complete" ++ (Debug.toString todoVal.complete) 
---             )
---         ]
---     Nothing ->
---       column[][]
-    
+        -- , Input.button [] { onPress = Nothing, label = "Add Child Todo" }
+        , Input.button [] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
+        ]
