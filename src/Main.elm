@@ -103,8 +103,6 @@ view model =
         column [ centerX, spacingXY 0 10, width fill, paddingXY 50 0 ]
             [ el [ Font.size 20, Font.color (rgb255 240 0 245), paddingXY 10 0 ] (text "Chibs Todo App")
             , renderTodo model.todolist.children model.todolist.root
-
-            -- , renderTodoList model.todolist.root.id model.todolist.children
             ]
 
 
@@ -141,7 +139,7 @@ renderTodo allTodos todo =
                 )
             , Input.button [] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
             ]
-        , row [ width fill ]
+        , row [ width fill, paddingEach { edges | top = 3 } ]
             [ renderTodoList todo.id allTodos ]
         ]
 
