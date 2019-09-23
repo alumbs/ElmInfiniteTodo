@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), Todo, TodoList, init, main, newTodo, newTodoList, renderTodo, renderTodoChildren, update, view)
+module Main exposing (Model, Msg(..), Todo, TodoList, init, main, newTodo, newTodoList, renderTodo, renderTodoList, update, view)
 
 import Browser
 import Element exposing (..)
@@ -32,6 +32,14 @@ type alias TodoList =
 type alias Model =
     { nextTodoId : Int
     , todolist : TodoList
+    }
+
+
+edges =
+    { top = 0
+    , right = 0
+    , bottom = 0
+    , left = 0
     }
 
 
@@ -94,30 +102,50 @@ view model =
     layout [ height fill, width fill, paddingXY 0 10 ] <|
         column [ centerX, spacingXY 0 10, width fill, paddingXY 50 0 ]
             [ el [ Font.size 20, Font.color (rgb255 240 0 245), paddingXY 10 0 ] (text "Chibs Todo App")
-            , renderTodo model.todolist.root
-            , renderTodoChildren model.todolist.children
+            , renderTodo model.todolist.children model.todolist.root
+
+            -- , renderTodoList model.todolist.root.id model.todolist.children
             ]
 
 
-renderTodoChildren : Maybe (List Todo) -> Element Msg
-renderTodoChildren children =
+renderTodoList : Int -> Maybe (List Todo) -> Element Msg
+renderTodoList parentTodoId children =
     case children of
         Nothing ->
             none
 
         Just todoChildren ->
-            column [ paddingXY 10 0, width fill ]
-                (List.map renderTodo todoChildren)
+            let
+                filterFunction =
+                    todoBelongsToParent parentTodoId
+
+                renderTodoFunction =
+                    renderTodo children
+
+                filteredTodos =
+                    List.filter filterFunction todoChildren
+            in
+            column [ paddingEach { edges | left = 10 }, width fill ]
+                (List.map renderTodoFunction filteredTodos)
 
 
-renderTodo : Todo -> Element Msg
-renderTodo todo =
-    row [ paddingXY 10 0, width fill, spaceEvenly ]
-        [ el [] (text (todo.description ++ Debug.toString todo.id))
-        , el []
-            (text <|
-                "Complete: "
-                    ++ Debug.toString todo.complete
-            )
-        , Input.button [] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
+renderTodo : Maybe (List Todo) -> Todo -> Element Msg
+renderTodo allTodos todo =
+    column [ paddingEach { edges | left = 10 }, width fill ]
+        [ row [ width fill, spaceEvenly ]
+            [ el [] (text (todo.description ++ Debug.toString todo.id))
+            , el []
+                (text <|
+                    "Complete: "
+                        ++ Debug.toString todo.complete
+                )
+            , Input.button [] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
+            ]
+        , row [ width fill ]
+            [ renderTodoList todo.id allTodos ]
         ]
+
+
+todoBelongsToParent : Int -> Todo -> Bool
+todoBelongsToParent parentTodoId todo =
+    todo.parentId == parentTodoId
