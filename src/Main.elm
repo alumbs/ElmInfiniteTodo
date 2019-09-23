@@ -86,16 +86,14 @@ addChildToTodolist todolist parentTodoId nextTodoId =
             { todolist | children = Just [ newTodo "New" parentTodoId (nextTodoId + 1) ] }
 
         Just listOfTodos ->
-            { todolist | children = Just (newTodo "New" parentTodoId (nextTodoId + 1) :: listOfTodos) }
+            { todolist | children = Just (listOfTodos ++ [ newTodo "New" parentTodoId (nextTodoId + 1) ]) }
 
 
 view : Model -> Html Msg
 view model =
     layout [ height fill, width fill, paddingXY 0 10 ] <|
-        column [ centerX, spacingXY 0 10 ]
-            [ el [ Font.size 20, Font.color (rgb255 240 0 245) ] (text "Chibs Todo App")
-
-            -- , Input.button [] { label = text "Add New Todo", onPress = Nothing }
+        column [ centerX, spacingXY 0 10, width fill, paddingXY 50 0 ]
+            [ el [ Font.size 20, Font.color (rgb255 240 0 245), paddingXY 10 0 ] (text "Chibs Todo App")
             , renderTodo model.todolist.root
             , renderTodoChildren model.todolist.children
             ]
@@ -108,20 +106,18 @@ renderTodoChildren children =
             none
 
         Just todoChildren ->
-            column []
+            column [ paddingXY 10 0, width fill ]
                 (List.map renderTodo todoChildren)
 
 
 renderTodo : Todo -> Element Msg
 renderTodo todo =
-    row [ paddingXY 10 0 ]
+    row [ paddingXY 10 0, width fill, spaceEvenly ]
         [ el [] (text (todo.description ++ Debug.toString todo.id))
         , el []
             (text <|
                 "Complete: "
                     ++ Debug.toString todo.complete
             )
-
-        -- , Input.button [] { onPress = Nothing, label = "Add Child Todo" }
         , Input.button [] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
         ]
