@@ -51,7 +51,7 @@ newTodoList =
 
 newTodoListWithOneChild : TodoList
 newTodoListWithOneChild =
-    { newTodoList | children = Just [ newTodo "New" 1 2 ] }
+    { newTodoList | children = Just [ newTodo "" 1 2 ] }
 
 
 newTodo : String -> Int -> Int -> Todo
@@ -70,7 +70,7 @@ init =
 
 type Msg
     = Add Int
-    | UpdateTodoId
+    | UpdateTodo Int String
     | ToggleTodoComplete Int
 
 
@@ -80,8 +80,12 @@ update msg model =
         Add parentTodoId ->
             { model | nextTodoId = model.nextTodoId + 1, todolist = addChildToTodolist model.todolist parentTodoId model.nextTodoId }
 
-        UpdateTodoId ->
-            { model | nextTodoId = model.nextTodoId + 1 }
+        UpdateTodo todoId newValue ->
+            if todoId == 1 then
+                { model | todolist = updateRootTodoValue model.todolist newValue }
+
+            else
+                { model | todolist = updateTodoInList model.todolist todoId newValue }
 
         ToggleTodoComplete todoId ->
             let
@@ -90,6 +94,45 @@ update msg model =
                     toggleTodoListComplete todoId
             in
             { model | todolist = toggleTodoListCompleteFunc model.todolist }
+
+
+updateRootTodoValue todolist newValue =
+    let
+        oldRoot =
+            todolist.root
+
+        newRoot =
+            { oldRoot | description = newValue }
+    in
+    { todolist | root = newRoot }
+
+
+updateTodoInList : TodoList -> Int -> String -> TodoList
+updateTodoInList todolist todoId newTodoValue =
+    case todolist.children of
+        Nothing ->
+            todolist
+
+        Just todos ->
+            { todolist | children = Just (updateTodoInListOfTodos todoId newTodoValue todos) }
+
+
+updateTodoInListOfTodos : Int -> String -> List Todo -> List Todo
+updateTodoInListOfTodos todoId newTodoValue listOfTodos =
+    let
+        updateFunction =
+            updateMatchingTodoChild todoId newTodoValue
+    in
+    List.map updateFunction listOfTodos
+
+
+updateMatchingTodoChild : Int -> String -> Todo -> Todo
+updateMatchingTodoChild todoId newValue singleTodo =
+    if todoId == singleTodo.id then
+        { singleTodo | description = newValue }
+
+    else
+        singleTodo
 
 
 toggleTodoListComplete idToFind todolist =
@@ -113,10 +156,10 @@ addChildToTodolist : TodoList -> Int -> Int -> TodoList
 addChildToTodolist todolist parentTodoId nextTodoId =
     case todolist.children of
         Nothing ->
-            { todolist | children = Just [ newTodo "New" parentTodoId (nextTodoId + 1) ] }
+            { todolist | children = Just [ newTodo "" parentTodoId (nextTodoId + 1) ] }
 
         Just listOfTodos ->
-            { todolist | children = Just (listOfTodos ++ [ newTodo "New" parentTodoId (nextTodoId + 1) ]) }
+            { todolist | children = Just (listOfTodos ++ [ newTodo "" parentTodoId (nextTodoId + 1) ]) }
 
 
 view : Model -> Html Msg
@@ -162,11 +205,14 @@ renderTodo allTodos todo =
     in
     column [ paddingEach { edges | left = 10 }, width fill ]
         [ row [ width fill, spaceEvenly ]
-            [ el [] (text (todo.description ++ Debug.toString todo.id))
+            [ Input.text [] { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
             , el []
                 (text <|
                     "Complete: "
                         ++ Debug.toString todo.complete
+                        ++ " "
+                        ++ Debug.toString todo.id
+                        ++ " "
                 )
             , Input.button [] { label = text completeTextString, onPress = Just (ToggleTodoComplete todo.id) }
             , Input.button [] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
