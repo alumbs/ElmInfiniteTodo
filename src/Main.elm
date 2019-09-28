@@ -210,6 +210,9 @@ toggleTodoComplete idToFind singleTodo =
     if singleTodo.id == idToFind then
         { singleTodo | complete = not singleTodo.complete }
 
+    else if singleTodo.parentId == idToFind then
+        { singleTodo | complete = not singleTodo.complete }
+
     else
         singleTodo
 
@@ -274,16 +277,13 @@ renderTodo allTodos todo =
                 , Border.width 0
                 , setTabIndex todo.tabIndex
                 , Font.color blue
+                , if todo.complete then
+                    Font.strike
+
+                  else
+                    Font.regular
                 ]
                 { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
-            , el [ Font.color lightyellow ]
-                (text <|
-                    "Complete: "
-                        ++ Debug.toString todo.complete
-                        ++ " "
-                        ++ Debug.toString todo.id
-                        ++ " "
-                )
             , Input.button [ alignRight, Background.color white, padding 10, Border.rounded 25, Font.color blue ] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
             ]
         , row [ width fill, paddingEach { edges | top = 3 } ]

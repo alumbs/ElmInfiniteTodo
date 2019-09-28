@@ -4491,7 +4491,9 @@ var author$project$Main$toggleTodoComplete = F2(
 	function (idToFind, singleTodo) {
 		return _Utils_eq(singleTodo.id, idToFind) ? _Utils_update(
 			singleTodo,
-			{complete: !singleTodo.complete}) : singleTodo;
+			{complete: !singleTodo.complete}) : (_Utils_eq(singleTodo.parentId, idToFind) ? _Utils_update(
+			singleTodo,
+			{complete: !singleTodo.complete}) : singleTodo);
 	});
 var elm$core$Basics$gt = _Utils_gt;
 var elm$core$List$foldl = F3(
@@ -4719,7 +4721,6 @@ var author$project$Main$UpdateTodo = F2(
 		return {$: 'UpdateTodo', a: a, b: b};
 	});
 var author$project$Main$edges = {bottom: 0, left: 0, right: 0, top: 0};
-var author$project$Main$lightyellow = A3(mdgriffith$elm_ui$Element$rgb255, 251, 238, 193);
 var elm$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
@@ -11052,23 +11053,6 @@ var mdgriffith$elm_ui$Element$column = F2(
 						attrs))),
 			mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var mdgriffith$elm_ui$Element$el = F2(
-	function (attrs, child) {
-		return A4(
-			mdgriffith$elm_ui$Internal$Model$element,
-			mdgriffith$elm_ui$Internal$Model$asEl,
-			mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				elm$core$List$cons,
-				mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$shrink),
-				A2(
-					elm$core$List$cons,
-					mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$shrink),
-					attrs)),
-			mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[child])));
-	});
 var mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
@@ -11230,6 +11214,13 @@ var mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 			'color',
 			fontColor));
 };
+var mdgriffith$elm_ui$Internal$Flag$fontWeight = mdgriffith$elm_ui$Internal$Flag$flag(13);
+var mdgriffith$elm_ui$Internal$Model$Class = F2(
+	function (a, b) {
+		return {$: 'Class', a: a, b: b};
+	});
+var mdgriffith$elm_ui$Element$Font$regular = A2(mdgriffith$elm_ui$Internal$Model$Class, mdgriffith$elm_ui$Internal$Flag$fontWeight, mdgriffith$elm_ui$Internal$Style$classes.textNormalWeight);
+var mdgriffith$elm_ui$Element$Font$strike = mdgriffith$elm_ui$Internal$Model$htmlClass(mdgriffith$elm_ui$Internal$Style$classes.strike);
 var elm$json$Json$Encode$bool = _Json_wrap;
 var elm$html$Html$Attributes$boolProperty = F2(
 	function (key, bool) {
@@ -11240,10 +11231,6 @@ var elm$html$Html$Attributes$boolProperty = F2(
 	});
 var elm$html$Html$Attributes$disabled = elm$html$Html$Attributes$boolProperty('disabled');
 var mdgriffith$elm_ui$Internal$Flag$cursor = mdgriffith$elm_ui$Internal$Flag$flag(21);
-var mdgriffith$elm_ui$Internal$Model$Class = F2(
-	function (a, b) {
-		return {$: 'Class', a: a, b: b};
-	});
 var mdgriffith$elm_ui$Element$pointer = A2(mdgriffith$elm_ui$Internal$Model$Class, mdgriffith$elm_ui$Internal$Flag$cursor, mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
 var elm$core$Basics$composeL = F3(
 	function (g, f, x) {
@@ -11937,6 +11924,23 @@ var mdgriffith$elm_ui$Element$alpha = function (o) {
 			'transparency-' + mdgriffith$elm_ui$Internal$Model$floatClass(transparency),
 			transparency));
 };
+var mdgriffith$elm_ui$Element$el = F2(
+	function (attrs, child) {
+		return A4(
+			mdgriffith$elm_ui$Internal$Model$element,
+			mdgriffith$elm_ui$Internal$Model$asEl,
+			mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				elm$core$List$cons,
+				mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$shrink),
+				A2(
+					elm$core$List$cons,
+					mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$shrink),
+					attrs)),
+			mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[child])));
+	});
 var mdgriffith$elm_ui$Element$rgba = mdgriffith$elm_ui$Internal$Model$Rgba;
 var mdgriffith$elm_ui$Element$Input$charcoal = A3(mdgriffith$elm_ui$Element$rgb, 136 / 255, 138 / 255, 133 / 255);
 var mdgriffith$elm_ui$Element$Input$renderPlaceholder = F3(
@@ -12269,7 +12273,8 @@ var author$project$Main$renderTodo = F2(
 										author$project$Main$specialFunction(todo.id))),
 									mdgriffith$elm_ui$Element$Border$width(0),
 									author$project$Main$setTabIndex(todo.tabIndex),
-									mdgriffith$elm_ui$Element$Font$color(author$project$Main$blue)
+									mdgriffith$elm_ui$Element$Font$color(author$project$Main$blue),
+									todo.complete ? mdgriffith$elm_ui$Element$Font$strike : mdgriffith$elm_ui$Element$Font$regular
 								]),
 							{
 								label: mdgriffith$elm_ui$Element$Input$labelHidden(''),
@@ -12281,14 +12286,6 @@ var author$project$Main$renderTodo = F2(
 										mdgriffith$elm_ui$Element$text('Enter New Todo Description'))),
 								text: todo.description
 							}),
-							A2(
-							mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[
-									mdgriffith$elm_ui$Element$Font$color(author$project$Main$lightyellow)
-								]),
-							mdgriffith$elm_ui$Element$text(
-								'Complete: ' + (elm$core$Debug$toString(todo.complete) + (' ' + (elm$core$Debug$toString(todo.id) + ' '))))),
 							A2(
 							mdgriffith$elm_ui$Element$Input$button,
 							_List_fromArray(
