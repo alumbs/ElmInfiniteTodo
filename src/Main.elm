@@ -143,21 +143,6 @@ update msg model =
                 model
 
 
-
--- case event of
---     "CtrlC" ->
---         let
---             -- findTodoForId = findTodo todoId
---             toggleTodoListCompleteFunc =
---                 toggleTodoListComplete todoId
---         in
---         { model | todolist = toggleTodoListCompleteFunc model.todolist }
---     "Enter" ->
---         { model | tabIndex = model.tabIndex + 1, nextTodoId = model.nextTodoId + 1, todolist = addChildToTodolist model.todolist todoId model.nextTodoId model.tabIndex }
---     _ ->
---         model
-
-
 updateRootTodoValue todolist newValue =
     let
         oldRoot =
