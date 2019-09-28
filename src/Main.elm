@@ -247,10 +247,17 @@ addChildToTodolist todolist parentTodoId nextTodoId oldTabIndex =
 
 view : Model -> Html Msg
 view model =
-    layout [ height fill, width fill, Background.color blue, paddingXY 0 30 ] <|
-        column [ centerX, spacingXY 0 10, width fill, paddingXY 50 0 ]
+    layout [ height fill, width fill, Background.color blue ] <|
+        column [ centerX, spacingXY 0 10, width fill, paddingXY 50 30 ]
             [ el [ Font.size 20, Font.color white, paddingXY 10 0 ] (text "Chibs Todo App")
             , renderTodo model.todolist.children model.todolist.root
+            , column [ spacing 10, alignBottom, paddingXY 0 30 ]
+                [ el [ Font.size 30, Font.color white ] (text "Here are the shortcuts for the application")
+                , text "Enter: Creates a new child todo"
+                , text "Tab: Goes to the next todo on the page"
+                , text "Ctrl + C: Completes the current todo"
+                , text "Ctrl + M: Minimizes the current todo"
+                ]
             ]
 
 
@@ -288,7 +295,7 @@ renderTodo allTodos todo =
     in
     column [ paddingEach { edges | left = 10, top = 5 }, width fill ]
         [ row [ width fill, spacing 15 ]
-            [ Input.button [ Font.color white, Font.size 30, width (fill |> minimum 15 |> maximum 15) ]
+            [ Input.button [ Font.color white, Font.size 30, width (fill |> minimum 15 |> maximum 15), setTabIndex -1 ]
                 { label =
                     if todo.minimized then
                         el [ Border.innerGlow lightyellow 1 ] (text "+")
@@ -302,7 +309,6 @@ renderTodo allTodos todo =
                     on "keydown" <|
                         specialFunction todo.id
                 , Border.width 0
-                , setTabIndex todo.tabIndex
                 , Font.color blue
                 , if todo.complete then
                     Font.strike
@@ -311,7 +317,7 @@ renderTodo allTodos todo =
                     Font.regular
                 ]
                 { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
-            , Input.button [ alignRight, Background.color white, padding 10, Border.rounded 25, Font.color blue ] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
+            , Input.button [ alignRight, Background.color white, padding 10, Border.rounded 25, Font.color blue, setTabIndex -1 ] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
             ]
         , if todo.minimized then
             Element.none
