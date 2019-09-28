@@ -315,9 +315,11 @@ renderTodo allTodos todo =
 
                   else
                     Font.regular
+                , Font.size 15
+                , spacing 0
+                , padding 5
                 ]
                 { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
-            , Input.button [ alignRight, Background.color white, padding 10, Border.rounded 25, Font.color blue, setTabIndex -1 ] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
             ]
         , if todo.minimized then
             Element.none

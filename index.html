@@ -4754,9 +4754,6 @@ var mdgriffith$elm_ui$Element$rgb255 = F3(
 		return A4(mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
 	});
 var author$project$Main$blue = A3(mdgriffith$elm_ui$Element$rgb255, 101, 157, 188);
-var author$project$Main$Add = function (a) {
-	return {$: 'Add', a: a};
-};
 var author$project$Main$ToggleTodoMinimized = function (a) {
 	return {$: 'ToggleTodoMinimized', a: a};
 };
@@ -5533,11 +5530,6 @@ var elm$html$Html$Events$on = F2(
 			event,
 			elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
-var mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
-	return {$: 'AlignX', a: a};
-};
-var mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
-var mdgriffith$elm_ui$Element$alignRight = mdgriffith$elm_ui$Internal$Model$AlignX(mdgriffith$elm_ui$Internal$Model$Right);
 var mdgriffith$elm_ui$Internal$Model$Height = function (a) {
 	return {$: 'Height', a: a};
 };
@@ -11232,11 +11224,7 @@ var mdgriffith$elm_ui$Internal$Model$Text = function (a) {
 var mdgriffith$elm_ui$Element$text = function (content) {
 	return mdgriffith$elm_ui$Internal$Model$Text(content);
 };
-var mdgriffith$elm_ui$Internal$Flag$bgColor = mdgriffith$elm_ui$Internal$Flag$flag(8);
-var mdgriffith$elm_ui$Internal$Model$Colored = F3(
-	function (a, b, c) {
-		return {$: 'Colored', a: a, b: b, c: c};
-	});
+var mdgriffith$elm_ui$Internal$Flag$shadows = mdgriffith$elm_ui$Internal$Flag$flag(19);
 var mdgriffith$elm_ui$Internal$Model$formatColorClass = function (_n0) {
 	var red = _n0.a;
 	var green = _n0.b;
@@ -11244,17 +11232,6 @@ var mdgriffith$elm_ui$Internal$Model$formatColorClass = function (_n0) {
 	var alpha = _n0.d;
 	return mdgriffith$elm_ui$Internal$Model$floatClass(red) + ('-' + (mdgriffith$elm_ui$Internal$Model$floatClass(green) + ('-' + (mdgriffith$elm_ui$Internal$Model$floatClass(blue) + ('-' + mdgriffith$elm_ui$Internal$Model$floatClass(alpha))))));
 };
-var mdgriffith$elm_ui$Element$Background$color = function (clr) {
-	return A2(
-		mdgriffith$elm_ui$Internal$Model$StyleClass,
-		mdgriffith$elm_ui$Internal$Flag$bgColor,
-		A3(
-			mdgriffith$elm_ui$Internal$Model$Colored,
-			'bg-' + mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
-			'background-color',
-			clr));
-};
-var mdgriffith$elm_ui$Internal$Flag$shadows = mdgriffith$elm_ui$Internal$Flag$flag(19);
 var mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
 	return elm$core$String$concat(
 		_List_fromArray(
@@ -11288,17 +11265,6 @@ var mdgriffith$elm_ui$Element$Border$innerGlow = F2(
 				size: size
 			});
 	});
-var mdgriffith$elm_ui$Internal$Flag$borderRound = mdgriffith$elm_ui$Internal$Flag$flag(17);
-var mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
-	return A2(
-		mdgriffith$elm_ui$Internal$Model$StyleClass,
-		mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + elm$core$String$fromInt(radius),
-			'border-radius',
-			elm$core$String$fromInt(radius) + 'px'));
-};
 var mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
 	function (a, b, c, d, e) {
 		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
@@ -11316,6 +11282,10 @@ var mdgriffith$elm_ui$Element$Border$width = function (v) {
 			v));
 };
 var mdgriffith$elm_ui$Internal$Flag$fontColor = mdgriffith$elm_ui$Internal$Flag$flag(14);
+var mdgriffith$elm_ui$Internal$Model$Colored = F3(
+	function (a, b, c) {
+		return {$: 'Colored', a: a, b: b, c: c};
+	});
 var mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 	return A2(
 		mdgriffith$elm_ui$Internal$Model$StyleClass,
@@ -11657,6 +11627,17 @@ var mdgriffith$elm_ui$Element$Input$calcMoveToCompensateForPadding = function (a
 			elm$core$Basics$floor(vSpace / 2));
 	}
 };
+var mdgriffith$elm_ui$Internal$Flag$bgColor = mdgriffith$elm_ui$Internal$Flag$flag(8);
+var mdgriffith$elm_ui$Element$Background$color = function (clr) {
+	return A2(
+		mdgriffith$elm_ui$Internal$Model$StyleClass,
+		mdgriffith$elm_ui$Internal$Flag$bgColor,
+		A3(
+			mdgriffith$elm_ui$Internal$Model$Colored,
+			'bg-' + mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
+			'background-color',
+			clr));
+};
 var mdgriffith$elm_ui$Internal$Flag$borderColor = mdgriffith$elm_ui$Internal$Flag$flag(28);
 var mdgriffith$elm_ui$Element$Border$color = function (clr) {
 	return A2(
@@ -11667,6 +11648,17 @@ var mdgriffith$elm_ui$Element$Border$color = function (clr) {
 			'bc-' + mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
 			'border-color',
 			clr));
+};
+var mdgriffith$elm_ui$Internal$Flag$borderRound = mdgriffith$elm_ui$Internal$Flag$flag(17);
+var mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
+	return A2(
+		mdgriffith$elm_ui$Internal$Model$StyleClass,
+		mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + elm$core$String$fromInt(radius),
+			'border-radius',
+			elm$core$String$fromInt(radius) + 'px'));
 };
 var mdgriffith$elm_ui$Element$Input$darkGrey = A3(mdgriffith$elm_ui$Element$rgb, 186 / 255, 189 / 255, 182 / 255);
 var mdgriffith$elm_ui$Element$paddingXY = F2(
@@ -12402,7 +12394,10 @@ var author$project$Main$renderTodo = F2(
 										author$project$Main$specialFunction(todo.id))),
 									mdgriffith$elm_ui$Element$Border$width(0),
 									mdgriffith$elm_ui$Element$Font$color(author$project$Main$blue),
-									todo.complete ? mdgriffith$elm_ui$Element$Font$strike : mdgriffith$elm_ui$Element$Font$regular
+									todo.complete ? mdgriffith$elm_ui$Element$Font$strike : mdgriffith$elm_ui$Element$Font$regular,
+									mdgriffith$elm_ui$Element$Font$size(15),
+									mdgriffith$elm_ui$Element$spacing(0),
+									mdgriffith$elm_ui$Element$padding(5)
 								]),
 							{
 								label: mdgriffith$elm_ui$Element$Input$labelHidden(''),
@@ -12413,22 +12408,6 @@ var author$project$Main$renderTodo = F2(
 										_List_Nil,
 										mdgriffith$elm_ui$Element$text('Enter New Todo Description'))),
 								text: todo.description
-							}),
-							A2(
-							mdgriffith$elm_ui$Element$Input$button,
-							_List_fromArray(
-								[
-									mdgriffith$elm_ui$Element$alignRight,
-									mdgriffith$elm_ui$Element$Background$color(author$project$Main$white),
-									mdgriffith$elm_ui$Element$padding(10),
-									mdgriffith$elm_ui$Element$Border$rounded(25),
-									mdgriffith$elm_ui$Element$Font$color(author$project$Main$blue),
-									author$project$Main$setTabIndex(-1)
-								]),
-							{
-								label: mdgriffith$elm_ui$Element$text('Add Child Todo'),
-								onPress: elm$core$Maybe$Just(
-									author$project$Main$Add(todo.id))
 							})
 						])),
 					todo.minimized ? mdgriffith$elm_ui$Element$none : A2(
@@ -12470,6 +12449,9 @@ var mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 };
 var mdgriffith$elm_ui$Internal$Model$Bottom = {$: 'Bottom'};
 var mdgriffith$elm_ui$Element$alignBottom = mdgriffith$elm_ui$Internal$Model$AlignY(mdgriffith$elm_ui$Internal$Model$Bottom);
+var mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
 var mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
 var mdgriffith$elm_ui$Element$centerX = mdgriffith$elm_ui$Internal$Model$AlignX(mdgriffith$elm_ui$Internal$Model$CenterX);
 var mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
