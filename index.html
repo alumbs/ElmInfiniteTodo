@@ -4719,6 +4719,7 @@ var author$project$Main$UpdateTodo = F2(
 		return {$: 'UpdateTodo', a: a, b: b};
 	});
 var author$project$Main$edges = {bottom: 0, left: 0, right: 0, top: 0};
+var author$project$Main$lightyellow = A3(mdgriffith$elm_ui$Element$rgb255, 251, 238, 193);
 var elm$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
@@ -12282,7 +12283,10 @@ var author$project$Main$renderTodo = F2(
 							}),
 							A2(
 							mdgriffith$elm_ui$Element$el,
-							_List_Nil,
+							_List_fromArray(
+								[
+									mdgriffith$elm_ui$Element$Font$color(author$project$Main$lightyellow)
+								]),
 							mdgriffith$elm_ui$Element$text(
 								'Complete: ' + (elm$core$Debug$toString(todo.complete) + (' ' + (elm$core$Debug$toString(todo.id) + ' '))))),
 							A2(

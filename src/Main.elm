@@ -31,6 +31,10 @@ darkbrown =
     rgb255 188 152 106
 
 
+lightyellow =
+    rgb255 251 238 193
+
+
 type alias Todo =
     { id : Int
     , description : String
@@ -272,7 +276,7 @@ renderTodo allTodos todo =
                 , Font.color blue
                 ]
                 { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
-            , el []
+            , el [ Font.color lightyellow ]
                 (text <|
                     "Complete: "
                         ++ Debug.toString todo.complete
@@ -280,8 +284,6 @@ renderTodo allTodos todo =
                         ++ Debug.toString todo.id
                         ++ " "
                 )
-
-            -- , Input.button [] { label = text completeTextString, onPress = Just (ToggleTodoComplete todo.id) }
             , Input.button [ alignRight, Background.color white, padding 10, Border.rounded 25, Font.color blue ] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
             ]
         , row [ width fill, paddingEach { edges | top = 3 } ]
