@@ -141,6 +141,13 @@ update msg model =
             else if Debug.toString event.keyCode == enterString then
                 { model | tabIndex = model.tabIndex + 1, nextTodoId = model.nextTodoId + 1, todolist = addChildToTodolist model.todolist todoId model.nextTodoId model.tabIndex }
 
+            else if event.ctrlKey && Debug.toString event.keyCode == "M" then
+                let
+                    toggleTodoListMinimizedFunc =
+                        toggleTodoListMinimized todoId
+                in
+                { model | todolist = toggleTodoListMinimizedFunc model.todolist }
+
             else
                 model
 
