@@ -41,6 +41,7 @@ type alias Todo =
     , complete : Bool
     , parentId : Int
     , tabIndex : Int
+    , minimized : Bool
     }
 
 
@@ -91,6 +92,7 @@ newTodo description parentTodoId nextTodoId oldTabIndex =
     , complete = False
     , parentId = parentTodoId
     , tabIndex = oldTabIndex + 1
+    , minimized = False
     }
 
 
@@ -104,6 +106,7 @@ type Msg
     | UpdateTodo Int String
     | ToggleTodoComplete Int
     | HandleKeyboardEvent Int KeyboardEvent
+    | ToggleTodoMinimized Int
 
 
 update : Msg -> Model -> Model
@@ -130,7 +133,6 @@ update msg model =
         HandleKeyboardEvent todoId event ->
             if event.ctrlKey && Debug.toString event.keyCode == "C" then
                 let
-                    -- findTodoForId = findTodo todoId
                     toggleTodoListCompleteFunc =
                         toggleTodoListComplete todoId
                 in
@@ -141,6 +143,13 @@ update msg model =
 
             else
                 model
+
+        ToggleTodoMinimized todoId ->
+            let
+                toggleTodoListMinimizedFunc =
+                    toggleTodoListMinimized todoId
+            in
+            { model | todolist = toggleTodoListMinimizedFunc model.todolist }
 
 
 updateRootTodoValue todolist newValue =
@@ -202,6 +211,23 @@ toggleTodoComplete idToFind singleTodo =
         singleTodo
 
 
+toggleTodoListMinimized idToFind todolist =
+    case todolist.children of
+        Nothing ->
+            todolist
+
+        Just todos ->
+            { todolist | children = Just (List.map (toggleTodoMinimized idToFind) todos) }
+
+
+toggleTodoMinimized idToFind singleTodo =
+    if singleTodo.id == idToFind then
+        { singleTodo | minimized = not singleTodo.minimized }
+
+    else
+        singleTodo
+
+
 addChildToTodolist : TodoList -> Int -> Int -> Int -> TodoList
 addChildToTodolist todolist parentTodoId nextTodoId oldTabIndex =
     case todolist.children of
@@ -253,9 +279,18 @@ renderTodo allTodos todo =
                 False ->
                     "Mark As Complete"
     in
-    column [ paddingEach { edges | left = 10 }, width fill ]
+    column [ paddingEach { edges | left = 10, top = 5 }, width fill ]
         [ row [ width fill, spacing 15 ]
-            [ Input.text
+            [ Input.button [ Font.color white, Font.size 30, width (fill |> minimum 15 |> maximum 15) ]
+                { label =
+                    if todo.minimized then
+                        el [ Border.innerGlow lightyellow 1 ] (text "+")
+
+                    else
+                        text "-"
+                , onPress = Just (ToggleTodoMinimized todo.id)
+                }
+            , Input.text
                 [ Element.htmlAttribute <|
                     on "keydown" <|
                         specialFunction todo.id
@@ -271,8 +306,12 @@ renderTodo allTodos todo =
                 { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
             , Input.button [ alignRight, Background.color white, padding 10, Border.rounded 25, Font.color blue ] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
             ]
-        , row [ width fill, paddingEach { edges | top = 3 } ]
-            [ renderTodoList todo.id allTodos ]
+        , if todo.minimized then
+            Element.none
+
+          else
+            row [ width fill ]
+                [ renderTodoList todo.id allTodos ]
         ]
 
 
@@ -298,7 +337,6 @@ onKeyUp : msg -> Attribute msg
 onKeyUp msg =
     let
         isEnterKey event =
-            -- if keyCode == 17 && keyCode == 67 then
             if event.ctrlKey && Debug.toString event.keyCode == "C" then
                 Json.succeed msg
 
@@ -311,32 +349,3 @@ onKeyUp msg =
     Element.htmlAttribute <|
         on "keyup" <|
             Json.andThen isEnterKey decodeKeyboardEvent
-
-
-
--- onEnter : msg -> Attribute msg
--- onEnter msg =
---     let
---         isEnterKey event =
---             -- if keyCode == 13 then
---             if Debug.toString event.keyCode == enterString then
---                 Json.succeed msg
---             else
---                 Json.fail "silent failure :)"
---     in
---     Element.htmlAttribute <|
---         on "keyup" <|
---             Json.andThen isEnterKey decodeKeyboardEvent
--- onKeyDown : msg -> Attribute msg
--- onKeyDown msg =
---     Element.htmlAttribute <|
---         on "keydown" <|
---             Json.map handleKeyboardEvent decodeKeyboardEvent
--- handleKeyboardEvent : KeyboardEvent -> msg
--- handleKeyboardEvent event =
---     if event.ctrlKey && Debug.toString event.keyCode == "C" then
---         ctrlCString
---     else if Debug.toString event.keyCode == enterString then
---         enterString
---     else
---         ""
