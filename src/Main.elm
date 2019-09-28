@@ -8,6 +8,7 @@ import Element.Events exposing (..)
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
+import Html.Attributes exposing (tabindex)
 import Html.Events exposing (on)
 import Json.Decode as Json
 import List exposing (append)
@@ -22,6 +23,7 @@ type alias Todo =
     , description : String
     , complete : Bool
     , parentId : Int
+    , tabIndex : Int
     }
 
 
@@ -34,6 +36,7 @@ type alias TodoList =
 type alias Model =
     { nextTodoId : Int
     , todolist : TodoList
+    , tabIndex : Int
     }
 
 
@@ -46,28 +49,29 @@ edges =
 
 
 newTodoList =
-    { root = newTodo "Root" -1 0
+    { root = newTodo "Root" -1 0 0
     , children = Nothing
     }
 
 
 newTodoListWithOneChild : TodoList
 newTodoListWithOneChild =
-    { newTodoList | children = Just [ newTodo "" 1 2 ] }
+    { newTodoList | children = Just [ newTodo "" 1 2 1 ] }
 
 
-newTodo : String -> Int -> Int -> Todo
-newTodo description parentTodoId nextTodoId =
+newTodo : String -> Int -> Int -> Int -> Todo
+newTodo description parentTodoId nextTodoId oldTabIndex =
     { id = nextTodoId + 1
     , description = description
     , complete = False
     , parentId = parentTodoId
+    , tabIndex = oldTabIndex + 1
     }
 
 
 init : Model
 init =
-    { nextTodoId = 0, todolist = newTodoList }
+    { nextTodoId = 0, todolist = newTodoList, tabIndex = 0 }
 
 
 type Msg
@@ -80,7 +84,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Add parentTodoId ->
-            { model | nextTodoId = model.nextTodoId + 1, todolist = addChildToTodolist model.todolist parentTodoId model.nextTodoId }
+            { model | tabIndex = model.tabIndex + 1, nextTodoId = model.nextTodoId + 1, todolist = addChildToTodolist model.todolist parentTodoId model.nextTodoId model.tabIndex }
 
         UpdateTodo todoId newValue ->
             if todoId == 1 then
@@ -154,14 +158,14 @@ toggleTodoComplete idToFind singleTodo =
         singleTodo
 
 
-addChildToTodolist : TodoList -> Int -> Int -> TodoList
-addChildToTodolist todolist parentTodoId nextTodoId =
+addChildToTodolist : TodoList -> Int -> Int -> Int -> TodoList
+addChildToTodolist todolist parentTodoId nextTodoId oldTabIndex =
     case todolist.children of
         Nothing ->
-            { todolist | children = Just [ newTodo "" parentTodoId (nextTodoId + 1) ] }
+            { todolist | children = Just [ newTodo "" parentTodoId (nextTodoId + 1) (oldTabIndex + 1) ] }
 
         Just listOfTodos ->
-            { todolist | children = Just (listOfTodos ++ [ newTodo "" parentTodoId (nextTodoId + 1) ]) }
+            { todolist | children = Just (listOfTodos ++ [ newTodo "" parentTodoId (nextTodoId + 1) (oldTabIndex + 1) ]) }
 
 
 view : Model -> Html Msg
@@ -207,7 +211,7 @@ renderTodo allTodos todo =
     in
     column [ paddingEach { edges | left = 10 }, width fill ]
         [ row [ width fill, spaceEvenly ]
-            [ Input.text [ onEnter (Add todo.id), Border.width 0 ] { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
+            [ Input.text [ onEnter (Add todo.id), Border.width 0, setTabIndex todo.tabIndex ] { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
             , el []
                 (text <|
                     "Complete: "
@@ -227,6 +231,11 @@ renderTodo allTodos todo =
 todoBelongsToParent : Int -> Todo -> Bool
 todoBelongsToParent parentTodoId todo =
     todo.parentId == parentTodoId
+
+
+setTabIndex : Int -> Attribute msg
+setTabIndex index =
+    Element.htmlAttribute <| tabindex index
 
 
 onEnter : msg -> Attribute msg
