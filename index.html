@@ -4439,9 +4439,9 @@ var elm$core$Array$toList = function (array) {
 	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
 };
 var elm$core$Basics$add = _Basics_add;
-var author$project$Main$newTodo = F3(
-	function (description, parentTodoId, nextTodoId) {
-		return {complete: false, description: description, id: nextTodoId + 1, parentId: parentTodoId};
+var author$project$Main$newTodo = F4(
+	function (description, parentTodoId, nextTodoId, oldTabIndex) {
+		return {complete: false, description: description, id: nextTodoId + 1, parentId: parentTodoId, tabIndex: oldTabIndex + 1};
 	});
 var elm$core$Basics$negate = function (n) {
 	return -n;
@@ -4449,15 +4449,15 @@ var elm$core$Basics$negate = function (n) {
 var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var author$project$Main$newTodoList = {
 	children: elm$core$Maybe$Nothing,
-	root: A3(author$project$Main$newTodo, 'Root', -1, 0)
+	root: A4(author$project$Main$newTodo, 'Root', -1, 0, 0)
 };
-var author$project$Main$init = {nextTodoId: 0, todolist: author$project$Main$newTodoList};
+var author$project$Main$init = {nextTodoId: 0, tabIndex: 0, todolist: author$project$Main$newTodoList};
 var elm$core$Basics$append = _Utils_append;
 var elm$core$Maybe$Just = function (a) {
 	return {$: 'Just', a: a};
 };
-var author$project$Main$addChildToTodolist = F3(
-	function (todolist, parentTodoId, nextTodoId) {
+var author$project$Main$addChildToTodolist = F4(
+	function (todolist, parentTodoId, nextTodoId, oldTabIndex) {
 		var _n0 = todolist.children;
 		if (_n0.$ === 'Nothing') {
 			return _Utils_update(
@@ -4466,7 +4466,7 @@ var author$project$Main$addChildToTodolist = F3(
 					children: elm$core$Maybe$Just(
 						_List_fromArray(
 							[
-								A3(author$project$Main$newTodo, '', parentTodoId, nextTodoId + 1)
+								A4(author$project$Main$newTodo, '', parentTodoId, nextTodoId + 1, oldTabIndex + 1)
 							]))
 				});
 		} else {
@@ -4479,7 +4479,7 @@ var author$project$Main$addChildToTodolist = F3(
 							listOfTodos,
 							_List_fromArray(
 								[
-									A3(author$project$Main$newTodo, '', parentTodoId, nextTodoId + 1)
+									A4(author$project$Main$newTodo, '', parentTodoId, nextTodoId + 1, oldTabIndex + 1)
 								])))
 				});
 		}
@@ -4647,7 +4647,8 @@ var author$project$Main$update = F2(
 					model,
 					{
 						nextTodoId: model.nextTodoId + 1,
-						todolist: A3(author$project$Main$addChildToTodolist, model.todolist, parentTodoId, model.nextTodoId)
+						tabIndex: model.tabIndex + 1,
+						todolist: A4(author$project$Main$addChildToTodolist, model.todolist, parentTodoId, model.nextTodoId, model.tabIndex)
 					});
 			case 'UpdateTodo':
 				var todoId = msg.a;
@@ -5093,6 +5094,16 @@ var author$project$Main$onEnter = function (msg) {
 			elm$html$Html$Events$on,
 			'keyup',
 			A2(elm$json$Json$Decode$andThen, isEnterKey, elm$html$Html$Events$keyCode)));
+};
+var elm$html$Html$Attributes$tabindex = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'tabIndex',
+		elm$core$String$fromInt(n));
+};
+var author$project$Main$setTabIndex = function (index) {
+	return mdgriffith$elm_ui$Element$htmlAttribute(
+		elm$html$Html$Attributes$tabindex(index));
 };
 var author$project$Main$todoBelongsToParent = F2(
 	function (parentTodoId, todo) {
@@ -10788,12 +10799,6 @@ var elm$html$Html$Attributes$boolProperty = F2(
 			elm$json$Json$Encode$bool(bool));
 	});
 var elm$html$Html$Attributes$disabled = elm$html$Html$Attributes$boolProperty('disabled');
-var elm$html$Html$Attributes$tabindex = function (n) {
-	return A2(
-		_VirtualDom_attribute,
-		'tabIndex',
-		elm$core$String$fromInt(n));
-};
 var mdgriffith$elm_ui$Internal$Flag$cursor = mdgriffith$elm_ui$Internal$Flag$flag(21);
 var mdgriffith$elm_ui$Element$pointer = A2(mdgriffith$elm_ui$Internal$Model$Class, mdgriffith$elm_ui$Internal$Flag$cursor, mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
 var elm$core$Basics$composeL = F3(
@@ -11886,7 +11891,8 @@ var author$project$Main$renderTodo = F2(
 								[
 									author$project$Main$onEnter(
 									author$project$Main$Add(todo.id)),
-									mdgriffith$elm_ui$Element$Border$width(0)
+									mdgriffith$elm_ui$Element$Border$width(0),
+									author$project$Main$setTabIndex(todo.tabIndex)
 								]),
 							{
 								label: mdgriffith$elm_ui$Element$Input$labelHidden(''),
