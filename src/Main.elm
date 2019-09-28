@@ -19,6 +19,18 @@ main =
     Browser.sandbox { init = init, update = update, view = view }
 
 
+blue =
+    rgb255 101 157 188
+
+
+white =
+    rgb 1 1 1
+
+
+darkbrown =
+    rgb255 188 152 106
+
+
 type alias Todo =
     { id : Int
     , description : String
@@ -210,9 +222,9 @@ addChildToTodolist todolist parentTodoId nextTodoId oldTabIndex =
 
 view : Model -> Html Msg
 view model =
-    layout [ height fill, width fill, paddingXY 0 10 ] <|
+    layout [ height fill, width fill, Background.color blue, paddingXY 0 30 ] <|
         column [ centerX, spacingXY 0 10, width fill, paddingXY 50 0 ]
-            [ el [ Font.size 20, Font.color (rgb255 240 0 245), paddingXY 10 0 ] (text "Chibs Todo App")
+            [ el [ Font.size 20, Font.color white, paddingXY 10 0 ] (text "Chibs Todo App")
             , renderTodo model.todolist.children model.todolist.root
             ]
 
@@ -250,13 +262,14 @@ renderTodo allTodos todo =
                     "Mark As Complete"
     in
     column [ paddingEach { edges | left = 10 }, width fill ]
-        [ row [ width fill, spaceEvenly ]
+        [ row [ width fill, spacing 15 ]
             [ Input.text
                 [ Element.htmlAttribute <|
                     on "keydown" <|
                         specialFunction todo.id
                 , Border.width 0
                 , setTabIndex todo.tabIndex
+                , Font.color blue
                 ]
                 { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
             , el []
@@ -269,7 +282,7 @@ renderTodo allTodos todo =
                 )
 
             -- , Input.button [] { label = text completeTextString, onPress = Just (ToggleTodoComplete todo.id) }
-            , Input.button [] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
+            , Input.button [ alignRight, Background.color white, padding 10, Border.rounded 25, Font.color blue ] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
             ]
         , row [ width fill, paddingEach { edges | top = 3 } ]
             [ renderTodoList todo.id allTodos ]
