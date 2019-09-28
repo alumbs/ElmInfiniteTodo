@@ -11,6 +11,7 @@ import Html exposing (Html)
 import Html.Attributes exposing (tabindex)
 import Html.Events exposing (on)
 import Json.Decode as Json
+import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
 import List exposing (append)
 
 
@@ -38,6 +39,14 @@ type alias Model =
     , todolist : TodoList
     , tabIndex : Int
     }
+
+
+ctrlCString =
+    "CtrlC"
+
+
+enterString =
+    "Enter"
 
 
 edges =
@@ -78,6 +87,7 @@ type Msg
     = Add Int
     | UpdateTodo Int String
     | ToggleTodoComplete Int
+    | HandleKeyboardEvent Int KeyboardEvent
 
 
 update : Msg -> Model -> Model
@@ -100,6 +110,36 @@ update msg model =
                     toggleTodoListComplete todoId
             in
             { model | todolist = toggleTodoListCompleteFunc model.todolist }
+
+        HandleKeyboardEvent todoId event ->
+            if event.ctrlKey && Debug.toString event.keyCode == "C" then
+                let
+                    -- findTodoForId = findTodo todoId
+                    toggleTodoListCompleteFunc =
+                        toggleTodoListComplete todoId
+                in
+                { model | todolist = toggleTodoListCompleteFunc model.todolist }
+
+            else if Debug.toString event.keyCode == enterString then
+                { model | tabIndex = model.tabIndex + 1, nextTodoId = model.nextTodoId + 1, todolist = addChildToTodolist model.todolist todoId model.nextTodoId model.tabIndex }
+
+            else
+                model
+
+
+
+-- case event of
+--     "CtrlC" ->
+--         let
+--             -- findTodoForId = findTodo todoId
+--             toggleTodoListCompleteFunc =
+--                 toggleTodoListComplete todoId
+--         in
+--         { model | todolist = toggleTodoListCompleteFunc model.todolist }
+--     "Enter" ->
+--         { model | tabIndex = model.tabIndex + 1, nextTodoId = model.nextTodoId + 1, todolist = addChildToTodolist model.todolist todoId model.nextTodoId model.tabIndex }
+--     _ ->
+--         model
 
 
 updateRootTodoValue todolist newValue =
@@ -211,7 +251,14 @@ renderTodo allTodos todo =
     in
     column [ paddingEach { edges | left = 10 }, width fill ]
         [ row [ width fill, spaceEvenly ]
-            [ Input.text [ onEnter (Add todo.id), Border.width 0, setTabIndex todo.tabIndex ] { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
+            [ Input.text
+                [ Element.htmlAttribute <|
+                    on "keydown" <|
+                        specialFunction todo.id
+                , Border.width 0
+                , setTabIndex todo.tabIndex
+                ]
+                { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
             , el []
                 (text <|
                     "Complete: "
@@ -220,7 +267,8 @@ renderTodo allTodos todo =
                         ++ Debug.toString todo.id
                         ++ " "
                 )
-            , Input.button [] { label = text completeTextString, onPress = Just (ToggleTodoComplete todo.id) }
+
+            -- , Input.button [] { label = text completeTextString, onPress = Just (ToggleTodoComplete todo.id) }
             , Input.button [] { label = text "Add Child Todo", onPress = Just (Add todo.id) }
             ]
         , row [ width fill, paddingEach { edges | top = 3 } ]
@@ -238,11 +286,23 @@ setTabIndex index =
     Element.htmlAttribute <| tabindex index
 
 
-onEnter : msg -> Attribute msg
-onEnter msg =
+specialFunction todoId =
     let
-        isEnterKey keyCode =
-            if keyCode == 13 then
+        awesomeFunc =
+            HandleKeyboardEvent todoId
+    in
+    Json.map awesomeFunc decodeKeyboardEvent
+
+
+onKeyUp : msg -> Attribute msg
+onKeyUp msg =
+    let
+        isEnterKey event =
+            -- if keyCode == 17 && keyCode == 67 then
+            if event.ctrlKey && Debug.toString event.keyCode == "C" then
+                Json.succeed msg
+
+            else if Debug.toString event.keyCode == enterString then
                 Json.succeed msg
 
             else
@@ -250,4 +310,33 @@ onEnter msg =
     in
     Element.htmlAttribute <|
         on "keyup" <|
-            Json.andThen isEnterKey Html.Events.keyCode
+            Json.andThen isEnterKey decodeKeyboardEvent
+
+
+
+-- onEnter : msg -> Attribute msg
+-- onEnter msg =
+--     let
+--         isEnterKey event =
+--             -- if keyCode == 13 then
+--             if Debug.toString event.keyCode == enterString then
+--                 Json.succeed msg
+--             else
+--                 Json.fail "silent failure :)"
+--     in
+--     Element.htmlAttribute <|
+--         on "keyup" <|
+--             Json.andThen isEnterKey decodeKeyboardEvent
+-- onKeyDown : msg -> Attribute msg
+-- onKeyDown msg =
+--     Element.htmlAttribute <|
+--         on "keydown" <|
+--             Json.map handleKeyboardEvent decodeKeyboardEvent
+-- handleKeyboardEvent : KeyboardEvent -> msg
+-- handleKeyboardEvent event =
+--     if event.ctrlKey && Debug.toString event.keyCode == "C" then
+--         ctrlCString
+--     else if Debug.toString event.keyCode == enterString then
+--         enterString
+--     else
+--         ""
