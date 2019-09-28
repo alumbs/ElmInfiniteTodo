@@ -8,6 +8,8 @@ import Element.Events exposing (..)
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
+import Html.Events exposing (on)
+import Json.Decode as Json
 import List exposing (append)
 
 
@@ -205,7 +207,7 @@ renderTodo allTodos todo =
     in
     column [ paddingEach { edges | left = 10 }, width fill ]
         [ row [ width fill, spaceEvenly ]
-            [ Input.text [ Border.width 0 ] { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
+            [ Input.text [ onEnter (Add todo.id), Border.width 0 ] { onChange = UpdateTodo todo.id, placeholder = Just (Input.placeholder [] (text "Enter New Todo Description")), label = Input.labelHidden "", text = todo.description }
             , el []
                 (text <|
                     "Complete: "
@@ -225,3 +227,18 @@ renderTodo allTodos todo =
 todoBelongsToParent : Int -> Todo -> Bool
 todoBelongsToParent parentTodoId todo =
     todo.parentId == parentTodoId
+
+
+onEnter : msg -> Attribute msg
+onEnter msg =
+    let
+        isEnterKey keyCode =
+            if keyCode == 13 then
+                Json.succeed msg
+
+            else
+                Json.fail "silent failure :)"
+    in
+    Element.htmlAttribute <|
+        on "keyup" <|
+            Json.andThen isEnterKey Html.Events.keyCode
