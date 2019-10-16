@@ -3,3 +3,5 @@ After installing elm, open the NEWTODOAPP folder up in vscode, switch to the com
 Your app should be hosted at localhost:8000
 
 Navigate to the url, click the src folder, and select Main.elm to see the app
+
+Access github pages at https://alumbs.github.io/ElmInfiniteTodo/
